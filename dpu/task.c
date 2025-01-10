@@ -66,7 +66,7 @@ int main(){
     uint32_t offset = 0;
 
     mram_read((__mram_ptr void const*)buffer, config, sizeof(lstm_config));
-    offset += 128;
+    offset += sizeof(lstm_config);
 
     printf("%lld\n", config->input_size);
     printf("%lld\n", config->hidden_size);

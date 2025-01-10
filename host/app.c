@@ -38,7 +38,7 @@ int main(){
     DPU_ASSERT(dpu_load(set, DPU_BINARY, NULL));
 
     DPU_ASSERT(dpu_broadcast_to(set, "buffer", 0, config, sizeof(int64_t) * 2, DPU_XFER_DEFAULT));
-    uint32_t offset = 128;
+    uint32_t offset = sizeof(int64_t) * 2;
 
     copy_weights_to_dpu(set, W_f, length, &offset);
     copy_weights_to_dpu(set, W_i, length, &offset);
