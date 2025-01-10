@@ -45,7 +45,6 @@ int get_vocab_index(char c) {
 __mram_noinit uint8_t buffer[BUFFER_SIZE];
 
 void load_weights_from_host(lstm_config * config, double * weights, uint32_t * offset){
-    // weights = mem_alloc(sizeof(double) * config->input_size * config->hidden_size);
     mram_read(
         (__mram_ptr void const*)(buffer + *offset), 
         weights, 
@@ -89,63 +88,6 @@ int main(){
     }
 
     printf("\n");
-
-
-    // // LSTM parameters
-    // const int input_size = 27;  // 26 letters + 1 unknown
-    // const int hidden_size = 10;  // Embedding size
-
-    // // Text input
-    // const char *text = "hello, my name is Patrick Li. I am a student from Umich.";
-    // int text_length = strlen(text);
-
-
-    // LSTM lstm;
-    // LSTM_init(&lstm, input_size, hidden_size);
-
-
-    // // Fill weights and biases with dummy values (in MRAM)
-    // float * temp_wb = mem_alloc(4 * hidden_size * (input_size + hidden_size) * sizeof(float));
-    // for (int i = 0; i < 4 * hidden_size * (input_size + hidden_size); i++) {
-    //     temp_wb[i] = 0.1f; // Example value
-    // }
-
-    // // // Tensor * weights = lstm.weights;
-    // Tensor_store(lstm.weights, temp_wb, 4 * hidden_size * (input_size + hidden_size));
-
-    // for (int i = 0; i < 4 * hidden_size; i++) {
-    //     temp_wb[i] = 0.1f; // Example value
-    // }
-
-    // Tensor_store(lstm.biases, temp_wb, 4 * hidden_size);
-
-
-    // // Initialize previous hidden and cell states (in MRAM)
-    // for (int i = 0; i < hidden_size; i++) {
-    //     temp_wb[i] = 0.0f;
-    // }
-
-    // Tensor_store(lstm.prev_hidden, temp_wb, hidden_size);
-    // Tensor_store(lstm.prev_cell, temp_wb, hidden_size);
-
-    // float * input = mem_alloc(sizeof(float) * input_size);
-
-    // // Process each character in the text
-    // for (int t = 0; t < text_length; t++) {
-    //     // Reset input vector
-    //     for (int i = 0; i < input_size; i++) input[i] = 0.0f;
-
-    //     // One-hot encode the current character
-    //     int char_index = get_vocab_index(text[t]);
-    //     if (char_index < input_size) input[char_index] = 1.0f;
-
-    //     LSTM_forward(&lstm, input);
-    //     break;
-    // }
-
-
-
-
 
     return 0;
 }
