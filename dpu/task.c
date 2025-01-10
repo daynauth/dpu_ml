@@ -6,10 +6,13 @@
 
 #include <mram.h>
 
-#include "tensor.h"
-#include "lstm.h"
-
 #define BUFFER_SIZE (1 << 16)
+
+typedef struct {
+    int64_t input_size;
+    int64_t hidden_size;
+} lstm_config;
+
 
 // Approximation of exp(x)
 float exp_approx(float x) {
@@ -53,10 +56,6 @@ void load_weights_from_host(lstm_config * config, double * weights, uint32_t * o
 
     *offset += sizeof(double) * config->input_size * config->hidden_size;
 }
-
-
-
-
 
 
 int main(){
