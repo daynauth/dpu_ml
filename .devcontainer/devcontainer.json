@@ -1,0 +1,9 @@
+{
+    "name": "DPU ML Dev Container",
+    "image": "johnramsden/upmem",
+    "runArgs": ["--rm"],
+    "workspaceFolder": "/app",
+    "mounts": [
+        "source=${localWorkspaceFolder},target=/app,type=bind"
+    ]
+}

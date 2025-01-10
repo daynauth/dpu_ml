@@ -1,0 +1,19 @@
+{
+    "configurations": [
+        {
+            "name": "Linux-DPU",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/opt/upmem/include/dpu/**",
+                "/opt/upmem/share/upmem/include/syslib/**",
+                "/opt/upmem/share/upmem/include/stdlib/**"
+            ],
+            "defines": [],
+            "intelliSenseMode": "linux-clang-x64",
+            "cStandard": "c99",
+            "compilerPath": "/opt/upmem/bin/dpu-upmem-dpurte-clang"
+        }
+    ],
+
+    "version": 4
+}

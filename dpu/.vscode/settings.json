@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "assert.h": "c",
+        "stdio.h": "c",
+        "stdbool.h": "c",
+        "lstm.h": "c"
+    },
+    "C_Cpp.codeAnalysis.clangTidy.checks.disabled": [
+    ]
+}

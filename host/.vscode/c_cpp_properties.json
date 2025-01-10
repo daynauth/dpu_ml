@@ -1,0 +1,17 @@
+{
+    "configurations": [
+        {
+            "name": "Linux-Host",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/opt/upmem/include/dpu/**"
+            ],
+            "defines": [],
+            "intelliSenseMode": "linux-clang-x64",
+            "cStandard": "c99",
+            "compilerPath": "/usr/bin/gcc"
+        }
+    ],
+
+    "version": 4
+}
