@@ -47,20 +47,20 @@ int get_vocab_index(char c) {
 
 __mram_noinit uint8_t buffer[BUFFER_SIZE];
 
-void load_weights_from_host(lstm_config * config, double * weights, uint32_t * offset){
+void load_weights_from_host(double * weights, uint32_t * offset, int64_t size){
     mram_read(
         (__mram_ptr void const*)(buffer + *offset), 
         weights, 
-        sizeof(double) * config->input_size * config->hidden_size
+        size
     );
 
-    *offset += sizeof(double) * config->input_size * config->hidden_size;
+    *offset += size;
 }
 
 
 int main(){
     __dma_aligned lstm_config * config;
-    __dma_aligned double * W_f, * W_i;
+    __dma_aligned double * W_f;
     uint32_t offset = 0;
 
     mram_read((__mram_ptr void const*)buffer, config, sizeof(lstm_config));
@@ -69,22 +69,21 @@ int main(){
     printf("%lld\n", config->input_size);
     printf("%lld\n", config->hidden_size);
 
-    W_f = mem_alloc(sizeof(double) * config->input_size * config->hidden_size);
-    W_i = mem_alloc(sizeof(double) * config->input_size * config->hidden_size);
+    int64_t shape[2] = {config->input_size + config->hidden_size, config->hidden_size};
+    int64_t weight_size = sizeof(double) * shape[0] * shape[1];
+    W_f = mem_alloc(weight_size);
 
 
-    load_weights_from_host(config, W_f, &offset);
-    load_weights_from_host(config, W_i, &offset);
+    load_weights_from_host(W_f, &offset, weight_size);
 
-    for(int64_t i = 0; i < config->input_size * config->hidden_size; i++){
+
+    for(int64_t i = 0; i < shape[0] * shape[1]; i++){
         printf("%lf, ", W_f[i]);
     }
 
     printf("\n");
 
-    for(int64_t i = 0; i < config->input_size * config->hidden_size; i++){
-        printf("%lf, ", W_i[i]);
-    }
+
 
     printf("\n");
 
