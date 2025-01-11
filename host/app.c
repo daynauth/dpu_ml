@@ -67,7 +67,6 @@ int main(){
     LSTM * lstm = LSTM_init(input_size, hidden_size);
 
     // generate random input
-    
     int64_t input_shape[2] = {batch_size, input_size};
     Tensor * x = Tensor_randn(2, input_shape);
 
@@ -78,10 +77,12 @@ int main(){
 
     Tensor * output = LSTM_forward(lstm, x, h_t, c_t);
 
+
     printf("LSTM Output\n");
     for(int64_t i = 0; i < output->n_elems; i++){
         printf("%lf, ", output->data[i]);
     }
+    printf("\n");
 
     DPU_ASSERT(dpu_alloc(1, NULL, &set));
     DPU_ASSERT(dpu_load(set, DPU_BINARY, NULL));
@@ -89,6 +90,8 @@ int main(){
 
     dpu_memcpy(set, (int64_t *)lstm, sizeof(int64_t) * 2);
     dpu_memcpy(set, lstm->W_i->data, lstm->W_i->n_elems * sizeof(double));
+    dpu_memcpy(set, h_t->data, h_t->n_elems * sizeof(double));
+    dpu_memcpy(set, x->data, x->n_elems * sizeof(double));
 
 
 

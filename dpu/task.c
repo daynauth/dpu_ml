@@ -6,6 +6,10 @@
 
 #include <mram.h>
 
+#ifndef NUM_TASKLETS
+#define NUM_TASKLETS 1
+#endif
+
 #define BUFFER_SIZE (1 << 16)
 
 typedef struct {
@@ -13,77 +17,79 @@ typedef struct {
     int64_t hidden_size;
 } lstm_config;
 
+static uint32_t __mram_offset = 0;
 
-// Approximation of exp(x)
-float exp_approx(float x) {
-    float result = 1.0f + x + (x * x) / 2.0f + (x * x * x) / 6.0f;
-    return result > 100.0f ? 100.0f : result; // Prevent overflow
-}
-
-// Approximation of sigmoid(x) = 1 / (1 + exp(-x))
-float sigmoid(float x) {
-    return 1.0f / (1.0f + exp_approx(-x));
-}
-
-// Approximation of tanh(x)
-float tanh_approx(float x) {
-    float x2 = x * x;
-    return x * (27.0f + x2) / (27.0f + 9.0f * x2);
-}
-
-// Manual array copy function
-void array_copy(float *dest, const float *src, int size) {
-    for (int i = 0; i < size; i++) {
-        dest[i] = src[i];
+void matrix_multiply(double *A, double *B, double *C, int rowsA, int colsA, int colsB) {
+    // Initialize the result matrix C to zero
+    for (int i = 0; i < rowsA; i++) {
+        for (int j = 0; j < colsB; j++) {
+            C[i * colsB + j] = 0.0;
+        }
     }
-}
 
-// Vocabulary-to-index mapping
-int get_vocab_index(char c) {
-    if (c >= 'a' && c <= 'z') return c - 'a';
-    if (c >= 'A' && c <= 'Z') return c - 'A';
-    return 26; // Unknown token
+    // Perform the matrix multiplication
+    for (int i = 0; i < rowsA; i++) {
+        for (int j = 0; j < colsB; j++) {
+            for (int k = 0; k < colsA; k++) {
+                C[i * colsB + j] += A[i * colsA + k] * B[k * colsB + j];
+            }
+        }
+    }
 }
 
 __mram_noinit uint8_t buffer[BUFFER_SIZE];
 
-void load_weights_from_host(double * weights, uint32_t * offset, int64_t size){
+void load_weights_from_host(void * weights, int64_t size){
     mram_read(
-        (__mram_ptr void const*)(buffer + *offset), 
+        (__mram_ptr void const*)(buffer + __mram_offset), 
         weights, 
         size
     );
 
-    *offset += size;
+    __mram_offset += size;
 }
 
+void concat_array(double *a, double *b, double *c, int64_t a_size, int64_t b_size){
+    for(int64_t i = 0; i < a_size; i++){
+        c[i] = a[i];
+    }
+
+    for(int64_t i = 0; i < b_size; i++){
+        c[i + a_size] = b[i];
+    }
+}
 
 int main(){
     __dma_aligned lstm_config * config;
-    __dma_aligned double * W_f;
-    uint32_t offset = 0;
+    __dma_aligned double * W_i;
+    __dma_aligned double * h_t;
+    __dma_aligned double * x;
+    __dma_aligned double * concat;
+    __dma_aligned double * output;
 
-    mram_read((__mram_ptr void const*)buffer, config, sizeof(lstm_config));
-    offset += sizeof(lstm_config);
+    load_weights_from_host(config, sizeof(lstm_config));
 
-    printf("%lld\n", config->input_size);
-    printf("%lld\n", config->hidden_size);
 
     int64_t shape[2] = {config->input_size + config->hidden_size, config->hidden_size};
     int64_t weight_size = sizeof(double) * shape[0] * shape[1];
-    W_f = mem_alloc(weight_size);
+    W_i = mem_alloc(weight_size);
+    h_t = mem_alloc(sizeof(double) * config->hidden_size);
+    x = mem_alloc(sizeof(double) * config->input_size);
+    concat = mem_alloc(sizeof(double) * (config->input_size + config->hidden_size));
+    output = mem_alloc(sizeof(double) * config->hidden_size);
+
+    load_weights_from_host(W_i, weight_size);
+    load_weights_from_host(h_t, sizeof(double) * config->hidden_size);
+    load_weights_from_host(x, sizeof(double) * config->input_size);
 
 
-    load_weights_from_host(W_f, &offset, weight_size);
+    concat_array(x, h_t, concat, config->input_size, config->hidden_size);
+    matrix_multiply(concat, W_i, output, 1, shape[0], shape[1]);
 
 
-    for(int64_t i = 0; i < shape[0] * shape[1]; i++){
-        printf("%lf, ", W_f[i]);
+    for(int64_t i = 0; i < config->hidden_size; i++){
+        printf("%lf, ", output[i]);
     }
-
-    printf("\n");
-
-
 
     printf("\n");
 
